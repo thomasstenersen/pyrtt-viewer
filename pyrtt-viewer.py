@@ -39,7 +39,7 @@ except ImportError:
 
 
 def connect(snr=None, jlink_khz=50000):
-    nrf = NrfAPI(NrfDeviceFamily.NRF51)
+    nrf = NrfAPI(NrfDeviceFamily.NRF52)
     nrf.open()
     if snr:
         nrf.connect_to_emu_with_snr(snr, jlink_khz)
@@ -50,7 +50,7 @@ def connect(snr=None, jlink_khz=50000):
     except API.APIError as e:
         if e.err_code == API.NrfjprogdllErr.WRONG_FAMILY_FOR_DEVICE:
             nrf.close()
-            nrf = NrfAPI(NrfDeviceFamily.NRF52)
+            nrf = NrfAPI(NrfDeviceFamily.NRF51)
             nrf.open()
             if snr:
                 nrf.connect_to_emu_with_snr(snr, jlink_khz)
