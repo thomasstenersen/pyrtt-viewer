@@ -72,7 +72,8 @@ def list_devices():
 
 class RTT(object):
     """RTT commication class"""
-    def __init__(self, nrf):
+    def __init__(self, nrf, args):
+        self._args = args
         self._nrf = nrf
         self._close_event = None
         self._writer_thread = None
@@ -82,7 +83,7 @@ class RTT(object):
         while not self._close_event.is_set():
             data = sys.stdin.readline().strip("\n")
             if len(data) > 0:
-                self._nrf.rtt_write(0, data)
+                self._nrf.rtt_write(self._args.channel, data)
                 # Yield
             time.sleep(0.1)
 
@@ -91,7 +92,7 @@ class RTT(object):
         rtt_data = ""
         while not self._close_event.is_set():
             try:
-                rtt_data = self._nrf.rtt_read(0, BLOCK_SIZE)
+                rtt_data = self._nrf.rtt_read(self._args.channel, BLOCK_SIZE)
             except Exception as e:
                 continue
 
@@ -145,7 +146,8 @@ class RTT(object):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("pyrtt-viewer")
     parser.add_argument("-s", "--segger-id", help="SEGGER ID of the nRF device", type=int)
+    parser.add_argument("-c", "--channel", help="RTT channel", type=int, default=0)
     args = parser.parse_args()
     nrf = connect(args.segger_id)
-    rtt = RTT(nrf)
+    rtt = RTT(nrf, args)
     rtt.run()
