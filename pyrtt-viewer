@@ -44,7 +44,7 @@ def connect(snr=None, jlink_khz=50000):
     else:
         nrf.connect_to_emu_without_snr(jlink_khz)
     try:
-        device_version = nrf.read_device_version()
+        version = nrf.read_device_version()  # noqa F81: unused variable
     except API.APIError as e:
         if e.err_code == API.NrfjprogdllErr.WRONG_FAMILY_FOR_DEVICE:
             nrf.close()
