@@ -148,4 +148,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     nrf = connect(args.segger_id)
     rtt = RTT(nrf, args)
-    rtt.run()
+    try:
+        rtt.run()
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        exit(0)
