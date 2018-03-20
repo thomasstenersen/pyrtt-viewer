@@ -36,13 +36,39 @@ except ImportError:
     exit(1)
 
 
+def get_snr(nrf):
+    devices = nrf.enum_emu_snr()
+    device_range = list(range(len(devices)))
+    if len(devices) > 0:
+        print("Connected devices:")
+        print("".join(["%d: %d\n" % (i, devices[i]) for i in device_range]))
+
+        number = None
+        while number is None:
+            try:
+                number = input("Select a device number or quit (q): ")
+                if number == "q":
+                    return None
+                elif int(number) in device_range:
+                    return devices[int(number)]
+            except ValueError:
+                pass
+
+            print("Invalid input \"%s\"" % (number))
+            number = None
+
+
 def connect(snr=None, jlink_khz=50000):
     nrf = NrfAPI(NrfDeviceFamily.NRF52)
     nrf.open()
-    if snr:
-        nrf.connect_to_emu_with_snr(snr, jlink_khz)
-    else:
-        nrf.connect_to_emu_without_snr(jlink_khz)
+    if not snr:
+        snr = get_snr(nrf)
+
+    if not snr:
+        nrf.close()
+        return None
+
+    nrf.connect_to_emu_with_snr(snr, jlink_khz)
     try:
         version = nrf.read_device_version()  # noqa F81: unused variable
     except API.APIError as e:
@@ -89,10 +115,7 @@ class RTT(object):
         BLOCK_SIZE = 512
         rtt_data = ""
         while not self._close_event.is_set():
-            try:
-                rtt_data = self._nrf.rtt_read(self._args.channel, BLOCK_SIZE)
-            except Exception as e:
-                continue
+            rtt_data = self._nrf.rtt_read(self._args.channel, BLOCK_SIZE)
 
             if rtt_data == "" or type(rtt_data) == int:
                 time.sleep(0.1)
@@ -103,7 +126,7 @@ class RTT(object):
                     continue
                 try:
                     sys.stdout.buffer.write(bytes(s, "ascii"))
-                except Exception as e:
+                except TypeError:
                     continue
 
                 sys.stdout.buffer.write(b'\n')
@@ -114,15 +137,12 @@ class RTT(object):
 
         # Wait for RTT to find control block etc.
         time.sleep(0.5)
-        try:
-            while not self._nrf.rtt_is_control_block_found():
-                logging.info("Looking for RTT control block...")
-                self._nrf.rtt_stop()
-                time.sleep(0.5)
-                self._nrf.rtt_start()
-                time.sleep(0.5)
-        except KeyboardInterrupt as e:
-            return
+        while not self._nrf.rtt_is_control_block_found():
+            logging.info("Looking for RTT control block...")
+            self._nrf.rtt_stop()
+            time.sleep(0.5)
+            self._nrf.rtt_start()
+            time.sleep(0.5)
 
         self._close_event = threading.Event()
         self._close_event.clear()
@@ -141,15 +161,23 @@ class RTT(object):
             self._writer_thread.join()
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser("pyrtt-viewer")
     parser.add_argument("-s", "--segger-id", help="SEGGER ID of the nRF device", type=int)
     parser.add_argument("-c", "--channel", help="RTT channel", type=int, default=0)
     args = parser.parse_args()
     nrf = connect(args.segger_id)
+    if not nrf:
+        exit(1)
+
     rtt = RTT(nrf, args)
     try:
         rtt.run()
     except KeyboardInterrupt:
         print("\nExiting...")
         exit(0)
+    rtt.run()
+
+
+if __name__ == "__main__":
+    main()
