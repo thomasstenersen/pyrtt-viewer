@@ -38,8 +38,8 @@ except ImportError:
 
 def get_snr(nrf):
     devices = nrf.enum_emu_snr()
-    device_range = list(range(len(devices)))
-    if len(devices) > 0:
+    if devices and len(devices) > 0:
+        device_range = list(range(len(devices)))
         print("Connected devices:")
         print("".join(["%d: %d\n" % (i, devices[i]) for i in device_range]))
 
@@ -56,7 +56,8 @@ def get_snr(nrf):
 
             print("Invalid input \"%s\"" % (number))
             number = None
-
+    else:
+        print("No devices connected.")
 
 def connect(snr=None, jlink_khz=50000):
     nrf = NrfAPI(NrfDeviceFamily.NRF52)
