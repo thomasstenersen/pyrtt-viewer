@@ -8,7 +8,7 @@ If you just want to use it directly, you can install using `pip`:
 
 Then you can run the script as a normal executable:
 
-    $ pyrtt-viever -h
+    $ pyrtt-viewer -h
 
 ## Usage
 
