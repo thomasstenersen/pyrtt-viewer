@@ -1,4 +1,5 @@
 build/
+.tox/
 dist/
 *.egg-info/
 *.pyc

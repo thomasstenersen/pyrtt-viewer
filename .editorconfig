@@ -1,0 +1,14 @@
+# See https://EditorConfig.org for more information.
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.py]
+# PEP8-recommended indent
+indent_size = 4
+# This should match configuration in setup.cfg
+max_line_length = 100
