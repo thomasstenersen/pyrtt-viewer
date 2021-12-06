@@ -1,6 +1,6 @@
 # PyRTT Viewer
 
-[![Lint status](https://github.com/thomasstenersen/pyrtt-viewer/workflows/Lint%20Code%20Base/badge.svg)](https://github.com/thomasstenersen/pyrtt-viewer)
+[![Lint status](https://github.com/thomasstenersen/pyrtt-viewer/workflows/Lint/badge.svg)](https://github.com/thomasstenersen/pyrtt-viewer)
 
 This is a simple Python 3 script for simple RTT interaction with an nRF5x device.
 
