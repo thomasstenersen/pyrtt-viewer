@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python31
 # MIT License
 #
 # Copyright (c) 2018 Thomas Stenersen
@@ -28,12 +28,12 @@ import logging
 import argparse
 
 try:
-    from pynrfjprog.API import API as NrfAPI
+    from pynrfjprog.API import API
     from pynrfjprog.API import DeviceFamily as NrfDeviceFamily
-    import pynrfjprog.API as API
 except ImportError:
-    print("Error: Could not find pynrfjprog.\nHave you run `pip install pynrfjprog`?")
-    exit(1)
+    print("Error: Could not find pynrfjprog.")
+    print("Did you run `pip install pynrfjprog`?")
+    sys.exit(1)
 
 
 def get_snr(nrf):
@@ -59,8 +59,9 @@ def get_snr(nrf):
     else:
         print("No devices connected.")
 
+
 def connect(snr=None, jlink_khz=50000):
-    nrf = NrfAPI(NrfDeviceFamily.NRF52)
+    nrf = API(NrfDeviceFamily.NRF52)
     nrf.open()
     if not snr:
         snr = get_snr(nrf)
@@ -71,11 +72,11 @@ def connect(snr=None, jlink_khz=50000):
 
     nrf.connect_to_emu_with_snr(snr, jlink_khz)
     try:
-        version = nrf.read_device_version()  # noqa F81: unused variable
+        _version = nrf.read_device_version()  # noqa F81: unused variable
     except API.APIError as e:
         if e.err_code == API.NrfjprogdllErr.WRONG_FAMILY_FOR_DEVICE:
             nrf.close()
-            nrf = NrfAPI(NrfDeviceFamily.NRF51)
+            nrf = API(NrfDeviceFamily.NRF51)
             nrf.open()
             if snr:
                 nrf.connect_to_emu_with_snr(snr, jlink_khz)
@@ -87,7 +88,7 @@ def connect(snr=None, jlink_khz=50000):
 
 
 def list_devices():
-    nrf = NrfAPI(NrfDeviceFamily.NRF51)
+    nrf = API(NrfDeviceFamily.NRF51)
     nrf.open()
     devices = nrf.enum_emu_snr()
     if devices:
@@ -95,7 +96,7 @@ def list_devices():
         nrf.close()
 
 
-class RTT(object):
+class RTT:
     """RTT commication class"""
     def __init__(self, nrf, args):
         self._args = args
@@ -156,7 +157,7 @@ class RTT(object):
             while self._reader_thread.is_alive() or \
                   self._writer_thread.is_alive():
                 time.sleep(0.1)
-        except KeyboardInterrupt as e:
+        except KeyboardInterrupt:
             self._close_event.set()
             self._reader_thread.join()
             self._writer_thread.join()
@@ -176,7 +177,7 @@ def main():
         rtt.run()
     except KeyboardInterrupt:
         print("\nExiting...")
-        exit(0)
+        sys.exit(0)
     rtt.run()
 
 
