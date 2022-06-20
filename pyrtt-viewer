@@ -24,6 +24,7 @@
 import sys
 import time
 import threading
+from datetime import datetime
 import logging
 import argparse
 
@@ -127,6 +128,9 @@ class RTT:
                 if s.strip() == "":
                     continue
                 try:
+                    if self._args.timestamp:
+                        now_str = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+                        s = now_str + ' ' + s
                     sys.stdout.buffer.write(bytes(s, "ascii"))
                 except TypeError:
                     continue
@@ -167,6 +171,7 @@ def main():
     parser = argparse.ArgumentParser("pyrtt-viewer")
     parser.add_argument("-s", "--segger-id", help="SEGGER ID of the nRF device", type=int)
     parser.add_argument("-c", "--channel", help="RTT channel", type=int, default=0)
+    parser.add_argument('-t', '--timestamp', action='store_true', help='Show timestamp')
     args = parser.parse_args()
     nrf = connect(args.segger_id)
     if not nrf:
